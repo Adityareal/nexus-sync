@@ -1,0 +1,100 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --paper: oklch(0.972 0.008 75);
+  --paper-2: oklch(0.945 0.012 75);
+  --ink: oklch(0.18 0.012 75);
+  --ink-2: oklch(0.42 0.010 75);
+  --rule: oklch(0.86 0.012 75);
+  --signal: oklch(0.62 0.165 38);
+  --signal-deep: oklch(0.48 0.140 38);
+  --code-ink: oklch(0.30 0.045 235);
+  color-scheme: light;
+}
+
+html {
+  background: var(--paper);
+}
+
+body {
+  color: var(--ink);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4 {
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+.font-mono {
+  font-feature-settings: "tnum", "zero";
+}
+
+.skip-link {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.skip-link:focus {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  width: auto;
+  height: auto;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 10px 16px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 13px;
+  z-index: 100;
+}
+
+.docs-toggle > summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.docs-toggle > summary::-webkit-details-marker {
+  display: none;
+}
+
+.docs-toggle .docs-toggle-marker::before {
+  content: "+";
+}
+
+.docs-toggle[open] .docs-toggle-marker::before {
+  content: "\2212";
+}
+
+::selection {
+  background: var(--signal);
+  color: var(--paper);
+}
+
+a {
+  color: inherit;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

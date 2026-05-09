@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" fill="oklch(0.972 0.008 75)" />
+  <text
+    x="16"
+    y="23"
+    text-anchor="middle"
+    font-family="Georgia, 'Source Serif 4', serif"
+    font-size="22"
+    font-weight="700"
+    fill="oklch(0.18 0.012 75)"
+  >N</text>
+  <circle cx="23" cy="8" r="2.4" fill="oklch(0.62 0.165 38)" />
+</svg>

@@ -55,7 +55,7 @@ function Hero() {
         </p>
         <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
           <a
-            href="#pricing"
+            href="/start"
             className="inline-block bg-signal-deep text-paper px-6 py-3 font-mono text-meta tracking-wide hover:bg-ink transition-colors duration-200"
           >
             Start a pod
@@ -195,7 +195,20 @@ export default defineConfig({
   return (
     <section className="bg-paper-2 border-y border-rule py-12 sm:py-16">
       <div className="mx-auto max-w-[1100px] px-6">
-        <p className="font-mono text-meta text-ink-2 mb-6">nexus.config.ts</p>
+        <div className="mb-8 sm:mb-10 max-w-[60ch]">
+          <p className="font-mono text-meta text-ink-2 mb-3">
+            01 — Configuration
+          </p>
+          <h2 className="font-serif text-h2 text-ink">
+            One file. Your whole environment.
+          </h2>
+          <p className="mt-3 text-body text-ink-2">
+            Declare the pod, sync rules, preview domain, and database fork in a
+            single typed config. Commit it, and every teammate gets the same
+            environment on their next <code className="font-mono text-mono text-code-ink">nexus up</code>.
+          </p>
+        </div>
+        <p className="font-mono text-meta text-ink-2 mb-3">nexus.config.ts</p>
         <pre className="font-mono text-[13px] sm:text-mono text-ink leading-relaxed overflow-x-auto">
           <code>{code}</code>
         </pre>

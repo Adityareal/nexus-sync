@@ -20,6 +20,7 @@ export const docNav: DocGroup[] = [
     items: [
       { slug: "intro", title: "Introduction to Nexus-Sync", status: "drafting", estimate: "next week" },
       { slug: "quickstart", title: "Quickstart, two minutes", status: "ready" },
+      { slug: "start-flow", title: "Start flow, four stages", status: "ready" },
       { slug: "system-requirements", title: "System requirements", status: "drafting", estimate: "next week" },
       { slug: "install-cli", title: "Installing the CLI", status: "drafting", estimate: "next week" },
       { slug: "vscode-extension", title: "VS Code extension setup", status: "drafting", estimate: "two weeks" },

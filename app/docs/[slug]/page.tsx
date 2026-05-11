@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { docNav, findDoc } from "@/lib/docs/content";
 import { QuickstartContent } from "@/components/QuickstartContent";
+import { StartFlowContent } from "@/components/StartFlowContent";
 import { DocPage } from "@/components/DocPage";
 
 export function generateStaticParams() {
@@ -25,6 +26,10 @@ export default function DocSlugPage({
 
   if (doc.slug === "quickstart") {
     return <QuickstartContent />;
+  }
+
+  if (doc.slug === "start-flow") {
+    return <StartFlowContent />;
   }
 
   return (

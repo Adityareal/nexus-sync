@@ -86,19 +86,24 @@ function MirrorSection() {
 function ClaimsSection() {
   return (
     <section id="note" className="mx-auto max-w-[680px] px-6 pb-24 sm:pb-32 md:pb-40">
-      <h2 className="sr-only">Three numbers</h2>
-      <Claim
-        n="1.8 seconds."
-        body="A pod with your repository, dependencies, and a hot database fork is ready before your terminal redraws. The cold start budget is the pause between two keystrokes."
-      />
-      <Claim
-        n="94 milliseconds."
-        body="Round trip from save on your laptop to a running cloud preview. Below the threshold the human eye registers as latency. Faster than your local language server some days."
-      />
-      <Claim
-        n="Zero leaked rows."
-        body="Every database fork is anonymized at the column level by a policy you write once and forget. Production data shape, none of the liability."
-      />
+      <p className="font-mono text-meta uppercase tracking-wide text-ink-2">
+        Engineering note
+      </p>
+      <h2 className="mt-3 font-serif text-h2 text-ink">Three numbers.</h2>
+      <div className="mt-10 sm:mt-14">
+        <Claim
+          n="1.8 seconds."
+          body="A pod with your repository, dependencies, and a hot database fork is ready before your terminal redraws. The cold start budget is the pause between two keystrokes."
+        />
+        <Claim
+          n="94 milliseconds."
+          body="Round trip from save on your laptop to a running cloud preview. Below the threshold the human eye registers as latency. Faster than your local language server some days."
+        />
+        <Claim
+          n="Zero leaked rows."
+          body="Every database fork is anonymized at the column level by a policy you write once and forget. Production data shape, none of the liability."
+        />
+      </div>
     </section>
   );
 }

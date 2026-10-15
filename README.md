@@ -1,6 +1,6 @@
 # Nexus-Sync, landing page (v3 editorial)
 
-A Next.js 14 landing page for an ephemeral developer cloud. The visual language deliberately rejects the saturated dev tool category aesthetic (dark mode plus cyan and magenta neon, isometric 3D, glowing data bridges, glassmorphic cards). It commits to a warm paper surface and a single oxidized copper signal color, set in Source Serif 4 with Inter for UI and JetBrains Mono for code.
+A Next.js 15 landing page for an ephemeral developer cloud. The visual language deliberately rejects the saturated dev tool category aesthetic (dark mode plus cyan and magenta neon, isometric 3D, glowing data bridges, glassmorphic cards). It commits to a warm paper surface and a single oxidized copper signal color, set in Source Serif 4 with Inter for UI and JetBrains Mono for code.
 
 The design choices are documented in `PRODUCT.md` and `DESIGN.md` per the impeccable skill. Read those before changing a token.
 
@@ -12,7 +12,7 @@ npm run dev
 # open http://localhost:3000
 ```
 
-Requires Node 18 or later.
+Requires Node 18.18 or later.
 
 ## Design tokens
 

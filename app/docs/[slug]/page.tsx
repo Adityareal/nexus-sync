@@ -8,18 +8,18 @@ export function generateStaticParams() {
   return docNav.flatMap((g) => g.items.map((i) => ({ slug: i.slug })));
 }
 
-export function generateMetadata({ params }: { params: { slug: string } }) {
-  const found = findDoc(params.slug);
+type DocParams = { params: Promise<{ slug: string }> };
+
+export async function generateMetadata({ params }: DocParams) {
+  const { slug } = await params;
+  const found = findDoc(slug);
   if (!found) return { title: "Not found, Nexus-Sync docs" };
   return { title: `${found.doc.title}, Nexus-Sync docs` };
 }
 
-export default function DocSlugPage({
-  params,
-}: {
-  params: { slug: string };
-}) {
-  const found = findDoc(params.slug);
+export default async function DocSlugPage({ params }: DocParams) {
+  const { slug } = await params;
+  const found = findDoc(slug);
   if (!found) notFound();
 
   const { doc, group } = found;
@@ -45,10 +45,10 @@ export default function DocSlugPage({
       <p>
         If you need this section sooner than the estimate, email{" "}
         <a
-          href="mailto:docs@nexus-sync.dev"
+          href="mailto:docs@nexus-sync.example"
           className="text-ink underline underline-offset-4 decoration-signal decoration-1 hover:decoration-2"
         >
-          docs@nexus-sync.dev
+          docs@nexus-sync.example
         </a>{" "}
         with the use case and we will prioritize it.
       </p>

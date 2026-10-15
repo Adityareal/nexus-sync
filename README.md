@@ -10,9 +10,10 @@ The design choices are documented in `PRODUCT.md` and `DESIGN.md` per the impecc
 npm install
 npm run dev
 # open http://localhost:3000
+npm test
 ```
 
-Requires Node 18.18 or later.
+Requires Node 18.18 or later. The test suite (Vitest and Testing Library) needs Node 22.12 or later.
 
 ## Design tokens
 

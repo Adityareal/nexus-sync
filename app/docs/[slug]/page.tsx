@@ -1,8 +1,11 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { docNav, findDoc } from "@/lib/docs/content";
 import { QuickstartContent } from "@/components/QuickstartContent";
 import { StartFlowContent } from "@/components/StartFlowContent";
 import { DocPage } from "@/components/DocPage";
+
+export const dynamicParams = false;
 
 export function generateStaticParams() {
   return docNav.flatMap((g) => g.items.map((i) => ({ slug: i.slug })));
@@ -32,22 +35,38 @@ export default async function DocSlugPage({ params }: DocParams) {
     return <StartFlowContent />;
   }
 
+  const readyDocs = docNav
+    .flatMap((g) => g.items)
+    .filter((d) => d.status === "ready");
+
+  const linkClass =
+    "text-ink underline underline-offset-4 decoration-signal decoration-1 hover:decoration-2";
+
   return (
     <DocPage kicker={group.label} title={doc.title}>
       <p className="text-body-l text-ink-2">
-        Drafting. Estimated {doc.estimate ?? "soon"}.
+        Drafting. The outline is fixed; the prose is not written yet.
       </p>
       <p>
-        This page is in the writing queue. The shape is fixed; the prose is in
-        revision. The team writes documentation in the same register as the
-        product, which means slowly, with examples that compile.
+        The team writes documentation in the same register as the product,
+        which means slowly, with examples that compile.
       </p>
       <p>
-        If you need this section sooner than the estimate, email{" "}
-        <a
-          href="mailto:docs@nexus-sync.example"
-          className="text-ink underline underline-offset-4 decoration-signal decoration-1 hover:decoration-2"
-        >
+        Finished so far:{" "}
+        {readyDocs.map((d, i) => (
+          <span key={d.slug}>
+            {/* Titles contain commas ("Quickstart, two minutes"), so items are split by semicolons. */}
+            {i > 0 && "; "}
+            <Link href={`/docs/${d.slug}`} className={linkClass}>
+              {d.title}
+            </Link>
+            {i === readyDocs.length - 1 && "."}
+          </span>
+        ))}
+      </p>
+      <p>
+        If you need this section now, email{" "}
+        <a href="mailto:docs@nexus-sync.example" className={linkClass}>
           docs@nexus-sync.example
         </a>{" "}
         with the use case and we will prioritize it.

@@ -8,10 +8,10 @@ If a prompt produces glowing cyan, dark mode, hex floors, or futuristic cityscap
 
 | Role | OKLCH | Approx hex |
 |---|---|---|
-| Paper | `oklch(0.972 0.008 75)` | `#f7f3ec` |
-| Paper 2 | `oklch(0.945 0.012 75)` | `#ede7d9` |
-| Ink | `oklch(0.18 0.012 75)` | `#1f1c16` |
-| Signal (oxidized copper) | `oklch(0.62 0.165 38)` | `#c2562b` |
+| Paper | `oklch(0.972 0.008 75)` | `#f9f5f0` |
+| Paper 2 | `oklch(0.945 0.012 75)` | `#f2ece4` |
+| Ink | `oklch(0.18 0.012 75)` | `#15110c` |
+| Signal (oxidized copper) | `oklch(0.62 0.165 38)` | `#d65a32` |
 
 ---
 
@@ -27,13 +27,13 @@ If a prompt produces glowing cyan, dark mode, hex floors, or futuristic cityscap
 
 ## 2. Wordmark logo
 
-> Wordmark only. The text "Nexus-Sync" set in Source Serif 4 at 600 weight, slight negative tracking, color ink (`#1f1c16`) on paper (`#f7f3ec`). Above the letter y in "Sync", a single small filled circle in oxidized copper (`#c2562b`), sized to the optical weight of a serif diacritic dot. No icon, no shield, no enclosure. Provide an inverted version with paper text on ink ground. Vector. Aspect 4 by 1.
+> Wordmark only. The text "Nexus-Sync" set in Source Serif 4 at 600 weight, slight negative tracking, color ink (`#15110c`) on paper (`#f9f5f0`). Above the letter y in "Sync", a single small filled circle in oxidized copper (`#d65a32`), sized to the optical weight of a serif diacritic dot. No icon, no shield, no enclosure. Provide an inverted version with paper text on ink ground. Vector. Aspect 4 by 1.
 
 ---
 
 ## 3. Editorial diagram, two color line drawing
 
-> A line drawing in two colors only: ink (`#1f1c16`) at 1.25 stroke weight, and oxidized copper (`#c2562b`) for the receiving block. Subject: a manila file glyph labeled `app/page.tsx` in JetBrains Mono on the left, a copper filled rectangle labeled `pod-7f2a` on the right, connected by a single horizontal line with a small arrowhead. The composition has generous warm paper margins. No background pattern, no grid, no perspective, no shadow. Reads like a figure in a Bret Victor essay. Aspect 16 by 5.
+> A line drawing in two colors only: ink (`#15110c`) at 1.25 stroke weight, and oxidized copper (`#d65a32`) for the receiving block. Subject: a manila file glyph labeled `app/page.tsx` in JetBrains Mono on the left, a copper filled rectangle labeled `pod-7f2a` on the right, connected by a single horizontal line with a small arrowhead. The composition has generous warm paper margins. No background pattern, no grid, no perspective, no shadow. Reads like a figure in a Bret Victor essay. Aspect 16 by 5.
 
 ---
 

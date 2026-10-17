@@ -3,3 +3,8 @@ node_modules
 out
 .env*
 .DS_Store
+
+.vercel
+.kiro/
+*.tsbuildinfo
+coverage/

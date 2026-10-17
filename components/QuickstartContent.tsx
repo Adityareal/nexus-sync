@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Code, DocPage, Pre } from "@/components/DocPage";
 
 export function QuickstartContent() {
@@ -26,11 +27,10 @@ export function QuickstartContent() {
       >
         1. Install the CLI
       </h2>
-      <Pre>npm install -g nexus-sync</Pre>
+      <Pre>curl -fsSL https://get.nexus-sync.example | sh</Pre>
       <p>
-        The binary publishes to npm as <Code>nexus-sync</Code> and exposes the{" "}
-        <Code>nxs</Code> command. Node 18 or later. macOS, Linux, and Windows
-        with WSL.
+        The script installs a single binary that exposes the <Code>nxs</Code>{" "}
+        command, on macOS, Linux, and Windows with WSL.
       </p>
 
       <h2
@@ -61,7 +61,7 @@ export function QuickstartContent() {
       <Pre>{`◐ booting pod-7f2a in fra1
 ✓ pod ready in 1.8s
 ✓ mirroring 2,431 files
-✓ running on https://pr-quickstart-7f2a.nexus-sync.dev`}</Pre>
+✓ running on https://pr-quickstart-7f2a.nexus-sync.example`}</Pre>
 
       <h2
         id="code"
@@ -86,9 +86,8 @@ export function QuickstartContent() {
       <p>
         Returns a shareable URL with team auth applied. Anyone in your
         organization sees the running app at the current state of your laptop,
-        with no need for them to clone, install, or rebuild. The pod
-        terminates when you stop watching, or after eight hours, whichever
-        comes first.
+        with no need for them to clone, install, or rebuild. The pod disposes
+        itself when you stop mirroring, or after eight hours idle.
       </p>
 
       <h2
@@ -101,12 +100,12 @@ export function QuickstartContent() {
         You now have a real pod. Stop it with <Code>nxs down</Code>, or close
         the laptop and the pod disposes itself. To customize CPU, memory, or
         the database fork policy, see the{" "}
-        <a
+        <Link
           href="/docs/custom-pod"
           className="text-ink underline underline-offset-4 decoration-signal decoration-1 hover:decoration-2"
         >
           custom pod configuration
-        </a>{" "}
+        </Link>{" "}
         guide.
       </p>
     </DocPage>

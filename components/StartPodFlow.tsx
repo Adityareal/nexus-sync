@@ -1,6 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -19,7 +27,7 @@ export type PodFormData = {
 
 const DEFAULT_FORM: PodFormData = {
   project: "nexus-sync",
-  framework: "Next.js 14.2.5",
+  framework: "Next.js 15.5.28",
   branch: "feature/auth-flow",
   size: "medium",
   database: true,
@@ -31,6 +39,13 @@ const DEFAULT_FORM: PodFormData = {
   ],
 };
 
+// One source of truth for the size specs, shared by the form, the boot log and
+// the success stage.
+const SIZE_SPECS: Record<PodFormData["size"], string> = {
+  small: "1 vCPU · 2 GiB",
+  medium: "2 vCPU · 4 GiB",
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Boot timeline. Each log line is anchored to a progress value in [0, 1].
 // The four stage markers map to milestones in the same timeline.
@@ -38,31 +53,51 @@ const DEFAULT_FORM: PodFormData = {
 
 type LogLine = { t: string; text: string; at: number };
 
-function bootLogsFor(branch: string): LogLine[] {
+function bootLogsFor(pod: PodFormData = DEFAULT_FORM): LogLine[] {
+  const branch = pod.branch.trim();
   const slug = slugifyBranch(branch);
-  return [
-    { t: "00:00.04", text: "nexus-sync v0.34.2", at: 0.02 },
+  const spec = SIZE_SPECS[pod.size];
+  const lines: LogLine[] = [
+    { t: "00:00.04", text: "nxs v0.34.2", at: 0.02 },
     { t: "00:00.12", text: "resolving ./nexus.config.ts", at: 0.07 },
-    { t: "00:00.18", text: "pod requested: us-east-1.b · 2 vCPU · 4 GiB", at: 0.10 },
+    { t: "00:00.18", text: `pod requested: us-east-1.b · ${spec}`, at: 0.1 },
     { t: "00:00.31", text: "layer cache hit: node:20-alpine (4 layers)", at: 0.17 },
-    { t: "00:00.42", text: "forking database from production", at: 0.24 },
-    { t: "00:00.71", text: "anonymized 12,847 rows across 3 tables", at: 0.40 },
-    { t: "00:01.08", text: "mirror sync engine attached: app/, lib/, prisma/", at: 0.60 },
+  ];
+  if (pod.database) {
+    lines.push(
+      { t: "00:00.42", text: "forking database from production", at: 0.24 },
+      { t: "00:00.71", text: "anonymized 12,847 rows across 3 tables", at: 0.4 },
+    );
+  } else {
+    lines.push({ t: "00:00.42", text: "database sandbox off, no fork", at: 0.24 });
+  }
+  lines.push(
+    { t: "00:01.08", text: "mirror sync engine attached: app/, lib/, prisma/", at: 0.6 },
     { t: "00:01.24", text: "installing dependencies (cached, 0 new)", at: 0.69 },
     { t: "00:01.39", text: "application listening on :3000", at: 0.77 },
-    { t: "00:01.62", text: `preview URL minted: pr-${slug}.nexus-sync.dev`, at: 0.90 },
+    { t: "00:01.62", text: `preview URL minted: pr-${slug}.nexus-sync.example`, at: 0.9 },
     { t: "00:01.78", text: "pod ready", at: 1.0 },
-  ];
+  );
+  return lines;
 }
 
 const STAGES = [
   { name: "Provision", at: 0.24 },
-  { name: "Database", at: 0.40 },
+  { name: "Database", at: 0.4 },
   { name: "Sync", at: 0.77 },
   { name: "Preview", at: 1.0 },
 ];
 
-const BOOT_DURATION_MS = 1800;
+const BOOT_DURATION_MS = 1780;
+const DEFAULT_BOOT_SECONDS = BOOT_DURATION_MS / 1000;
+
+// The active stage is the first milestone the progress has not yet reached; once
+// everything is reached, the last stage is active. This is the same rule the
+// milestone labels use for `active`, computed once and shared.
+function activeStageIndex(progress: number): number {
+  const idx = STAGES.findIndex((s) => progress < s.at - 0.005);
+  return idx === -1 ? STAGES.length - 1 : idx;
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Frame chrome: shared header + body container for all stages.
@@ -72,15 +107,25 @@ function Frame({
   step,
   stepLabel,
   title,
-  onClose,
+  autoFocusTitle = false,
   children,
 }: {
   step: string;
   stepLabel: string;
   title: string;
-  onClose?: () => void;
+  autoFocusTitle?: boolean;
   children: React.ReactNode;
 }) {
+  const titleRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    if (autoFocusTitle) {
+      titleRef.current?.focus({ preventScroll: true });
+    }
+    // Focus once on mount when the orchestrator signals a stage transition.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="bg-paper border border-rule w-full">
       <header className="flex items-start justify-between gap-6 px-6 sm:px-9 pt-7 pb-6 border-b border-rule">
@@ -88,22 +133,14 @@ function Frame({
           <p className="font-mono text-meta text-ink-2 tracking-wide uppercase">
             {step} <span className="mx-1.5 text-rule">/</span> {stepLabel}
           </p>
-          <h2 className="mt-2 font-serif text-[32px] sm:text-[40px] text-ink leading-[1.08] tracking-tight">
+          <h2
+            ref={titleRef}
+            tabIndex={-1}
+            className="mt-2 font-serif text-[32px] sm:text-[40px] text-ink leading-[1.08] tracking-tight focus:outline-none"
+          >
             {title}
           </h2>
         </div>
-        {onClose ? (
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="shrink-0 size-8 grid place-items-center text-ink-2 hover:text-ink transition-colors duration-200"
-          >
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
-              <path d="M1 1L13 13M13 1L1 13" stroke="currentColor" strokeWidth="1.25" />
-            </svg>
-          </button>
-        ) : null}
       </header>
       <div className="px-6 sm:px-9 py-7 sm:py-9">{children}</div>
     </div>
@@ -117,109 +154,147 @@ function Frame({
 export function StartPodForm({
   initial = DEFAULT_FORM,
   onSubmit,
-  onCancel,
   frozen = false,
+  autoFocusTitle = false,
 }: {
   initial?: PodFormData;
   onSubmit?: (data: PodFormData) => void;
-  onCancel?: () => void;
   frozen?: boolean;
+  autoFocusTitle?: boolean;
 }) {
   const [data, setData] = useState<PodFormData>(initial);
   const [envOpen, setEnvOpen] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const submitTimer = useRef<number | null>(null);
+  const [branchError, setBranchError] = useState(false);
+  const branchId = useId();
+  const branchHintId = useId();
+  const branchErrorId = useId();
+  const sizeLabelId = useId();
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(
-    () => () => {
-      if (submitTimer.current !== null) {
-        window.clearTimeout(submitTimer.current);
-      }
-    },
-    [],
-  );
+  const branchTrimmed = data.branch.trim();
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (frozen || submitting) return;
-    setSubmitting(true);
-    // Brief intent feedback before the parent transitions to boot.
-    submitTimer.current = window.setTimeout(() => {
-      submitTimer.current = null;
-      onSubmit?.(data);
-    }, 280);
+    if (frozen) return;
+    if (slugifyBranch(branchTrimmed) === "") {
+      setBranchError(true);
+      inputRef.current?.focus();
+      return;
+    }
+    setBranchError(false);
+    onSubmit?.({ ...data, branch: branchTrimmed });
   }
+
+  function handleBranchChange(value: string) {
+    setData({ ...data, branch: value });
+    if (branchError) setBranchError(false);
+  }
+
+  const describedBy = branchError
+    ? `${branchHintId} ${branchErrorId}`
+    : branchHintId;
 
   return (
     <Frame
-      step="01 / 03"
+      step="02 / 04"
       stepLabel="Configure"
       title="Start an ephemeral pod."
-      onClose={frozen ? undefined : onCancel}
+      autoFocusTitle={autoFocusTitle}
     >
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} noValidate>
         <dl className="border-t border-rule">
           <Row icon={<ProjectIcon />} label="Project">
-            <div className="flex items-baseline flex-wrap gap-x-3 gap-y-1">
-              <span className="font-mono text-[18px] font-medium text-ink tracking-tight">
-                {data.project}
-              </span>
-              <button
-                type="button"
-                className="font-mono text-meta text-ink-2 hover:text-ink underline underline-offset-4 decoration-rule hover:decoration-signal"
-              >
-                edit
-              </button>
-            </div>
+            <span className="font-mono text-[18px] font-medium text-ink tracking-tight">
+              {data.project}
+            </span>
           </Row>
 
           <Row icon={<FrameworkIcon />} label="Framework">
-            <span className="font-mono text-mono text-ink">{data.framework}</span>
-            <span className="ml-3 inline-flex items-center gap-1.5 font-mono text-meta text-ink-2">
-              <Check />
-              detected from package.json
-            </span>
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <span className="font-mono text-mono text-ink">{data.framework}</span>
+              <span className="inline-flex items-center gap-1.5 font-mono text-meta text-ink-2">
+                <Check />
+                detected from package.json
+              </span>
+            </div>
           </Row>
 
-          <Row icon={<BranchIcon />} label="Branch">
-            <div className="flex items-center gap-3">
+          <Row icon={<BranchIcon />} label="Branch" htmlFor={branchId}>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
               <input
+                id={branchId}
+                ref={inputRef}
                 type="text"
                 value={data.branch}
-                onChange={(e) => setData({ ...data, branch: e.target.value })}
+                onChange={(e) => handleBranchChange(e.target.value)}
                 disabled={frozen}
-                className="font-mono text-mono text-ink bg-transparent border-0 border-b border-rule focus:border-signal focus:outline-none focus:ring-0 px-0 py-1 min-w-[14ch] disabled:opacity-100"
+                maxLength={100}
+                aria-describedby={describedBy}
+                aria-invalid={branchError ? "true" : undefined}
+                className="font-mono text-mono text-ink bg-transparent border-0 border-b border-rule-strong focus:border-signal focus:outline-none focus:ring-0 px-0 py-1 w-full min-w-0 sm:w-auto sm:min-w-[14ch] disabled:opacity-100"
               />
-              <span className="font-mono text-meta text-ink-2">tracking origin/{data.branch}</span>
+              {branchTrimmed !== "" ? (
+                <span id={branchHintId} className="min-w-0 font-mono text-meta text-ink-2 [overflow-wrap:anywhere]">
+                  tracking origin/{branchTrimmed}
+                </span>
+              ) : (
+                <span id={branchHintId} className="sr-only">
+                  The preview URL is built from the branch name.
+                </span>
+              )}
             </div>
+            {branchError ? (
+              <p id={branchErrorId} className="mt-2 font-mono text-meta text-signal-deep">
+                Enter a branch name. The preview URL is built from it.
+              </p>
+            ) : null}
           </Row>
 
-          <Row icon={<SizeIcon />} label="Size">
-            <div className="inline-flex border border-rule">
-              {(["small", "medium"] as const).map((s) => {
-                const active = data.size === s;
-                return (
-                  <button
-                    type="button"
-                    key={s}
-                    onClick={() => !frozen && setData({ ...data, size: s })}
-                    className={[
-                      "px-4 py-2 font-mono text-meta uppercase tracking-wide transition-colors duration-200",
-                      active
-                        ? "bg-ink text-paper"
-                        : "bg-paper text-ink-2 hover:text-ink",
-                      s === "small" ? "border-r border-rule" : "",
-                    ].join(" ")}
-                    aria-pressed={active}
-                  >
-                    {s}
-                  </button>
-                );
-              })}
+          <Row icon={<SizeIcon />} label="Size" labelId={sizeLabelId}>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+              <div
+                role="radiogroup"
+                aria-labelledby={sizeLabelId}
+                className="inline-flex border border-rule"
+              >
+                {(["small", "medium"] as const).map((s) => {
+                  const checked = data.size === s;
+                  return (
+                    <label
+                      key={s}
+                      className={[
+                        frozen ? "cursor-default" : "cursor-pointer",
+                        s === "small" ? "border-r border-rule" : "",
+                      ].join(" ")}
+                    >
+                      <input
+                        type="radio"
+                        name={`${sizeLabelId}-size`}
+                        value={s}
+                        checked={checked}
+                        disabled={frozen}
+                        onChange={() => setData({ ...data, size: s })}
+                        className="sr-only peer"
+                      />
+                      <span
+                        className={[
+                          "block px-4 py-2 font-mono text-meta uppercase tracking-wide transition-colors duration-200",
+                          "bg-paper text-ink-2",
+                          frozen ? "" : "hover:text-ink",
+                          "peer-checked:bg-ink peer-checked:text-paper",
+                          "peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-signal peer-focus-visible:outline-offset-2",
+                        ].join(" ")}
+                      >
+                        {s}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+              <span className="font-mono text-meta text-ink-2 whitespace-nowrap">
+                {SIZE_SPECS[data.size]}
+              </span>
             </div>
-            <span className="ml-4 font-mono text-meta text-ink-2">
-              {data.size === "small" ? "1 vCPU · 2 GiB" : "2 vCPU · 4 GiB"}
-            </span>
           </Row>
 
           <Row icon={<DatabaseIcon />} label="Database">
@@ -264,14 +339,6 @@ export function StartPodForm({
                     <span className="text-ink truncate">{v.value}</span>
                   </li>
                 ))}
-                <li className="pt-3">
-                  <button
-                    type="button"
-                    className="font-mono text-meta text-ink-2 hover:text-ink underline underline-offset-4 decoration-rule"
-                  >
-                    + add override
-                  </button>
-                </li>
               </ul>
             ) : null}
           </Row>
@@ -281,33 +348,14 @@ export function StartPodForm({
           <p className="font-mono text-meta text-ink-2">
             Boots in <span className="text-ink">~1.8s</span>. Auto-disposes after 8h idle.
           </p>
-          <div className="flex items-center gap-6">
-            <button
-              type="button"
-              onClick={onCancel}
-              className="font-mono text-meta text-ink-2 hover:text-ink underline underline-offset-4 decoration-rule hover:decoration-signal"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={frozen || submitting}
-              aria-busy={submitting}
-              className="inline-flex items-center gap-3 bg-signal-deep text-paper px-7 py-3.5 font-mono text-[15px] font-semibold uppercase tracking-[0.04em] hover:bg-ink transition-colors duration-200 disabled:opacity-100 disabled:cursor-default"
-            >
-              {submitting ? (
-                <>
-                  <Spinner />
-                  <span>Booting</span>
-                </>
-              ) : (
-                <>
-                  <span>Boot pod</span>
-                  <ArrowRight />
-                </>
-              )}
-            </button>
-          </div>
+          <button
+            type="submit"
+            disabled={frozen}
+            className="inline-flex items-center gap-3 bg-signal-deep text-paper px-7 py-3.5 font-mono text-[15px] font-semibold uppercase tracking-[0.04em] hover:bg-ink transition-colors duration-200 disabled:opacity-100 disabled:cursor-default"
+          >
+            <span>Boot pod</span>
+            <ArrowRight />
+          </button>
         </div>
       </form>
     </Frame>
@@ -317,21 +365,29 @@ export function StartPodForm({
 function Row({
   icon,
   label,
+  htmlFor,
+  labelId,
   children,
 }: {
   icon?: React.ReactNode;
   label: string;
+  htmlFor?: string;
+  labelId?: string;
   children: React.ReactNode;
 }) {
   return (
-    <div className="grid grid-cols-[7rem_1fr] sm:grid-cols-[10rem_1fr] gap-6 items-baseline border-b border-rule py-5">
-      <dt className="font-mono text-meta uppercase tracking-wide text-ink-2 pt-1 inline-flex items-center gap-2">
+    <div className="grid grid-cols-1 gap-y-2 sm:grid-cols-[10rem_1fr] sm:gap-x-6 sm:gap-y-0 items-baseline border-b border-rule py-5">
+      <dt className="font-mono text-meta uppercase tracking-wide text-ink-2 sm:pt-1 inline-flex items-center gap-2">
         {icon ? (
           <span className="text-ink-2 shrink-0 inline-flex" aria-hidden>
             {icon}
           </span>
         ) : null}
-        <span>{label}</span>
+        {htmlFor ? (
+          <label htmlFor={htmlFor}>{label}</label>
+        ) : (
+          <span id={labelId}>{label}</span>
+        )}
       </dt>
       <dd className="text-ink">{children}</dd>
     </div>
@@ -356,7 +412,9 @@ function Toggle({
       disabled={disabled}
       className={[
         "relative inline-block h-6 w-11 border align-middle transition-colors duration-200",
-        on ? "bg-signal border-signal-deep" : "bg-paper border-rule hover:border-ink-2",
+        on
+          ? "bg-signal border-signal-deep"
+          : "bg-paper border-rule-strong hover:border-ink-2",
       ].join(" ")}
     >
       <span
@@ -364,38 +422,10 @@ function Toggle({
           "absolute top-1/2 left-[3px] -translate-y-1/2 h-[16px] w-[16px] border transition-transform duration-200 ease-out-quart",
           on
             ? "translate-x-[19px] bg-paper border-signal-deep"
-            : "translate-x-0 bg-paper-2 border-rule",
+            : "translate-x-0 bg-paper-2 border-rule-strong",
         ].join(" ")}
       />
     </button>
-  );
-}
-
-function Spinner() {
-  return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 14 14"
-      fill="none"
-      aria-hidden
-      className="animate-spin"
-    >
-      <circle
-        cx="7"
-        cy="7"
-        r="5.5"
-        stroke="currentColor"
-        strokeOpacity="0.3"
-        strokeWidth="1.5"
-      />
-      <path
-        d="M12.5 7 A 5.5 5.5 0 0 0 7 1.5"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="square"
-      />
-    </svg>
   );
 }
 
@@ -431,11 +461,7 @@ function BranchIcon() {
       <circle cx="4" cy="3" r="1.25" stroke="currentColor" strokeWidth="1.1" />
       <circle cx="4" cy="11" r="1.25" stroke="currentColor" strokeWidth="1.1" />
       <circle cx="10" cy="7" r="1.25" stroke="currentColor" strokeWidth="1.1" />
-      <path
-        d="M4 4.25 V9.75 M4 7 H8.75"
-        stroke="currentColor"
-        strokeWidth="1.1"
-      />
+      <path d="M4 4.25 V9.75 M4 7 H8.75" stroke="currentColor" strokeWidth="1.1" />
     </svg>
   );
 }
@@ -497,53 +523,75 @@ function ArrowRight() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function StartPodBoot({
-  branch,
+  pod = DEFAULT_FORM,
   autoplay = true,
   frozenProgress,
   onComplete,
+  autoFocusTitle = false,
 }: {
-  branch: string;
+  pod?: PodFormData;
   autoplay?: boolean;
   frozenProgress?: number;
   onComplete?: () => void;
+  autoFocusTitle?: boolean;
 }) {
-  const [progress, setProgress] = useState(frozenProgress ?? (autoplay ? 0 : 0));
-  const startedRef = useRef(false);
+  const [progress, setProgress] = useState(frozenProgress ?? 0);
+  const onCompleteRef = useRef(onComplete);
+  const listRef = useRef<HTMLOListElement>(null);
+
+  // Keep the latest callback in a ref so the animation effect never depends on
+  // the parent's inline arrow (a new identity every render would restart boot).
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
 
   useEffect(() => {
     if (typeof frozenProgress === "number") {
       setProgress(frozenProgress);
       return;
     }
-    if (!autoplay || startedRef.current) return;
-    startedRef.current = true;
+    if (!autoplay) return;
     const start = performance.now();
     let raf = 0;
-    const tick = (now: number) => {
-      const t = Math.min(1, (now - start) / BOOT_DURATION_MS);
-      // Smooth ease-out so the bar isn't linear, but the milestones still snap
-      // because logs are gated by raw t, not the eased value.
+    // Read the clock here rather than using the rAF timestamp: that is the
+    // frame's start time, which can be earlier than `start` (and in jsdom comes
+    // from a different clock), so progress could go negative.
+    const tick = () => {
+      const t = Math.min(1, (performance.now() - start) / BOOT_DURATION_MS);
       setProgress(t);
       if (t < 1) {
         raf = requestAnimationFrame(tick);
       } else {
-        onComplete?.();
+        onCompleteRef.current?.();
       }
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [autoplay, frozenProgress, onComplete]);
+  }, [autoplay, frozenProgress]);
 
+  const branch = pod.branch.trim();
   const seconds = progress * (BOOT_DURATION_MS / 1000);
   const elapsed = seconds.toFixed(2);
   const elapsedTimestamp = `00:${seconds.toFixed(2).padStart(5, "0")}`;
-  const logs = useMemo(() => bootLogsFor(branch), [branch]);
+  const logs = useMemo(() => bootLogsFor(pod), [pod]);
   const visibleLogs = logs.filter((l) => progress >= l.at);
-  const currentStage =
-    [...STAGES].reverse().find((s) => progress >= s.at - 0.01)?.name ?? STAGES[0].name;
+  const stageIndex = activeStageIndex(progress);
+  const currentStage = STAGES[stageIndex].name;
+  // Only a boot that is really running gets a pulsing "live" dot; the frozen
+  // storyboard shows a still.
+  const streaming = typeof frozenProgress !== "number" && autoplay && progress < 1;
+
+  // Terminal tail: the log box is a fixed height and the newest lines overflow
+  // it near the end of the boot (much earlier on phones, where lines wrap), so
+  // pin the scroll to the bottom whenever the visible line count changes.
+  const visibleCount = visibleLogs.length + (progress < 1 ? 1 : 0);
+  useLayoutEffect(() => {
+    const el = listRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [visibleCount]);
 
   return (
-    <Frame step="02 / 03" stepLabel="Boot" title="Booting your pod.">
+    <Frame step="03 / 04" stepLabel="Boot" title="Booting your pod." autoFocusTitle={autoFocusTitle}>
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-8 lg:gap-12">
         {/* Left: pod mark + elapsed + branch */}
         <div className="flex flex-col items-start">
@@ -558,7 +606,7 @@ export function StartPodBoot({
           <dl className="mt-8 space-y-2.5 font-mono text-meta">
             <MetaRow k="branch" v={branch} />
             <MetaRow k="region" v="us-east-1.b" />
-            <MetaRow k="image" v="node:20-alpine" />
+            <MetaRow k="image" v={`node:20-alpine · ${SIZE_SPECS[pod.size]}`} />
             <MetaRow k="stage" v={currentStage.toLowerCase()} />
           </dl>
         </div>
@@ -567,21 +615,30 @@ export function StartPodBoot({
         <div className="bg-paper-2 border border-rule">
           <div className="border-b border-rule px-4 py-2.5 flex items-center justify-between">
             <p className="font-mono text-meta text-ink-2 uppercase tracking-wide">
-              nexus boot · streaming
+              nxs up · streaming
             </p>
             <span className="inline-flex items-center gap-1.5 font-mono text-meta text-ink-2">
-              <span className="size-1.5 rounded-full bg-signal animate-pulse" />
+              <span
+                aria-hidden
+                className={[
+                  "size-1.5 rounded-full bg-signal",
+                  streaming ? "animate-pulse" : "",
+                ].join(" ")}
+              />
               live
             </span>
           </div>
-          <ol className="px-4 py-3.5 font-mono text-mono text-ink leading-[1.7] min-h-[280px] max-h-[280px] overflow-hidden">
+          <ol
+            ref={listRef}
+            className="px-4 py-3.5 font-mono text-mono text-ink leading-[1.7] h-[280px] overflow-hidden"
+          >
             {visibleLogs.map((l) => (
               <li
                 key={l.t}
                 className="grid grid-cols-[7.5ch_1fr] gap-4 animate-[logIn_220ms_cubic-bezier(0.16,1,0.3,1)_both]"
               >
                 <span className="text-ink-2 tabular-nums">{l.t}</span>
-                <span>{l.text}</span>
+                <span className="[overflow-wrap:anywhere]">{l.text}</span>
               </li>
             ))}
             {progress < 1 ? (
@@ -598,7 +655,15 @@ export function StartPodBoot({
 
       {/* Progress bar with stage milestones */}
       <div className="mt-9">
-        <div className="relative h-px bg-rule">
+        <div
+          role="progressbar"
+          aria-label="Boot progress"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={Math.round(progress * 100)}
+          aria-valuetext={`${currentStage}, ${seconds.toFixed(2)} seconds`}
+          className="relative h-px bg-rule"
+        >
           <div
             className="absolute inset-y-0 left-0 bg-signal-deep origin-left transition-transform duration-200 ease-out-quart"
             style={{ width: "100%", transform: `scaleX(${progress})` }}
@@ -617,12 +682,10 @@ export function StartPodBoot({
             />
           ))}
         </div>
-        <div className="mt-3 grid grid-cols-4 font-mono text-meta">
-          {STAGES.map((s) => {
+        <div className="mt-3 grid grid-cols-2 gap-y-1 sm:grid-cols-4 font-mono text-meta">
+          {STAGES.map((s, i) => {
             const done = progress >= s.at - 0.005;
-            const active =
-              progress < s.at &&
-              progress >= (STAGES[STAGES.indexOf(s) - 1]?.at ?? 0) - 0.005;
+            const active = i === stageIndex && !done;
             return (
               <span
                 key={s.name}
@@ -645,7 +708,7 @@ function MetaRow({ k, v }: { k: string; v: string }) {
   return (
     <div className="grid grid-cols-[5.5rem_1fr] gap-4">
       <dt className="text-ink-2 uppercase tracking-wide">{k}</dt>
-      <dd className="text-ink">{v}</dd>
+      <dd className="text-ink min-w-0 [overflow-wrap:anywhere]">{v}</dd>
     </div>
   );
 }
@@ -696,38 +759,87 @@ function PodMark({ progress }: { progress: number }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function StartPodSuccess({
-  branch,
-  bootSeconds = 1.78,
-  onClose,
+  pod = DEFAULT_FORM,
+  bootSeconds = DEFAULT_BOOT_SECONDS,
+  onStop,
   frozen = false,
+  autoFocusTitle = false,
 }: {
-  branch: string;
+  pod?: PodFormData;
   bootSeconds?: number;
-  onClose?: () => void;
+  onStop?: () => void;
   frozen?: boolean;
+  autoFocusTitle?: boolean;
 }) {
+  const branch = pod.branch.trim();
   const slug = useMemo(() => slugifyBranch(branch), [branch]);
-  const url = `https://pr-${slug}.nexus-sync.dev`;
+  const url = `https://pr-${slug}.nexus-sync.example`;
   const [copied, setCopied] = useState(false);
+  const [copyFailed, setCopyFailed] = useState(false);
   const [stopArmed, setStopArmed] = useState(false);
+  const [logsOpen, setLogsOpen] = useState(false);
+  const [demoNote, setDemoNote] = useState("");
+  const [copyStatus, setCopyStatus] = useState("");
+  const resetTimer = useRef<number | null>(null);
+  const logsId = useId();
 
-  function handleCopy() {
+  const logs = useMemo(() => bootLogsFor(pod), [pod]);
+  const dbRow = pod.database ? "forked · anonymized · 12,847 rows" : "off";
+
+  useEffect(
+    () => () => {
+      if (resetTimer.current !== null) window.clearTimeout(resetTimer.current);
+    },
+    [],
+  );
+
+  const handleCopy = useCallback(() => {
     if (frozen) {
       setCopied(true);
       return;
     }
-    navigator.clipboard?.writeText(url).then(() => {
+    const done = () => {
       setCopied(true);
-      window.setTimeout(() => setCopied(false), 1600);
-    });
+      setCopyFailed(false);
+      setCopyStatus("Link copied.");
+      if (resetTimer.current !== null) window.clearTimeout(resetTimer.current);
+      resetTimer.current = window.setTimeout(() => {
+        setCopied(false);
+        resetTimer.current = null;
+      }, 1600);
+    };
+    const fail = () => {
+      setCopyFailed(true);
+      setCopied(false);
+      setCopyStatus("Copy failed. Select the address and copy it.");
+    };
+    const clip = navigator.clipboard;
+    if (!clip) {
+      fail();
+      return;
+    }
+    clip.writeText(url).then(done, fail);
+  }, [frozen, url]);
+
+  function handleOpen(e: React.MouseEvent) {
+    e.preventDefault();
+    if (frozen) return;
+    setDemoNote(
+      `Demo only. No pod is running, so pr-${slug}.nexus-sync.example does not resolve.`,
+    );
+  }
+
+  function confirmStop() {
+    setStopArmed(false);
+    onStop?.();
   }
 
   return (
     <Frame
-      step="03 / 03"
+      step="04 / 04"
       stepLabel="Live"
       title="Your pod is running."
-      onClose={frozen ? undefined : onClose}
+      autoFocusTitle={autoFocusTitle}
     >
       {/* URL block: the proof. Large, typeset, copper underline. */}
       <div className="border-t border-rule pt-7">
@@ -735,9 +847,10 @@ export function StartPodSuccess({
         <div className="mt-3 flex flex-wrap items-baseline gap-x-6 gap-y-3">
           <a
             href={url}
-            className="font-serif text-[28px] sm:text-[34px] leading-[1.1] text-ink underline decoration-signal underline-offset-[6px] decoration-1 hover:decoration-2"
+            onClick={handleOpen}
+            className="font-serif text-[28px] sm:text-[34px] leading-[1.1] text-ink underline decoration-signal underline-offset-[6px] decoration-1 hover:decoration-2 min-w-0 [overflow-wrap:anywhere]"
           >
-            pr-{slug}.nexus-sync.dev
+            pr-{slug}.nexus-sync.example
           </a>
           <button
             type="button"
@@ -745,7 +858,7 @@ export function StartPodSuccess({
             className="inline-flex items-center gap-2 font-mono text-meta text-ink-2 hover:text-ink transition-colors duration-200"
           >
             <CopyIcon />
-            {copied ? "copied" : "copy"}
+            {copyFailed ? "copy failed" : copied ? "copied" : "copy"}
           </button>
         </div>
         <p className="mt-3 font-mono text-meta text-ink-2">
@@ -759,8 +872,8 @@ export function StartPodSuccess({
         items={[
           { k: "branch", v: branch },
           { k: "region", v: "us-east-1.b" },
-          { k: "image", v: "node:20-alpine · 2 vCPU · 4 GiB" },
-          { k: "database", v: "forked · anonymized · 12,847 rows" },
+          { k: "image", v: `node:20-alpine · ${SIZE_SPECS[pod.size]}` },
+          { k: "database", v: dbRow },
           { k: "mirror sync", v: "attached · 94ms median" },
           { k: "auto-dispose", v: "in 7h 59m" },
         ]}
@@ -770,13 +883,15 @@ export function StartPodSuccess({
       <div className="mt-9 flex flex-wrap items-center gap-x-7 gap-y-4">
         <a
           href={url}
+          onClick={handleOpen}
           className="inline-flex items-center gap-3 bg-signal-deep text-paper px-6 py-3 font-mono text-meta uppercase tracking-wide hover:bg-ink transition-colors duration-200"
         >
           Open in browser
           <ArrowOut />
         </a>
         <a
-          href={`vscode://nexus-sync.dev/open?pod=pr-${slug}`}
+          href={`vscode://vscode-remote/ssh-remote+pr-${slug}.nexus-sync.example/workspace`}
+          onClick={handleOpen}
           className="font-mono text-meta text-ink hover:text-signal-deep underline underline-offset-4 decoration-rule hover:decoration-signal"
         >
           Open in VS Code
@@ -786,14 +901,17 @@ export function StartPodSuccess({
           onClick={handleCopy}
           className="font-mono text-meta text-ink hover:text-signal-deep underline underline-offset-4 decoration-rule hover:decoration-signal"
         >
-          {copied ? "Link copied" : "Copy link"}
+          {copyFailed ? "Copy failed" : copied ? "Link copied" : "Copy link"}
         </button>
-        <a
-          href="#logs"
+        <button
+          type="button"
+          onClick={() => setLogsOpen((v) => !v)}
+          aria-expanded={logsOpen}
+          aria-controls={logsId}
           className="font-mono text-meta text-ink hover:text-signal-deep underline underline-offset-4 decoration-rule hover:decoration-signal"
         >
-          View logs
-        </a>
+          {logsOpen ? "Hide logs" : "View logs"}
+        </button>
         <span className="grow" aria-hidden />
         {!stopArmed ? (
           <button
@@ -808,10 +926,7 @@ export function StartPodSuccess({
             <span className="text-ink-2">Stop now?</span>
             <button
               type="button"
-              onClick={() => {
-                setStopArmed(false);
-                onClose?.();
-              }}
+              onClick={confirmStop}
               className="text-ink underline underline-offset-4 decoration-signal"
             >
               confirm
@@ -826,6 +941,34 @@ export function StartPodSuccess({
           </span>
         )}
       </div>
+
+      {/* Polite status for the demo note. The region stays mounted so the message is announced. */}
+      <p
+        role="status"
+        className={demoNote ? "mt-4 font-mono text-meta text-ink-2" : "sr-only"}
+      >
+        {demoNote}
+      </p>
+
+      {/* sr-only copy status region. */}
+      <p role="status" className="sr-only">
+        {copyStatus}
+      </p>
+
+      {/* View logs: the full boot log for this pod. */}
+      {logsOpen ? (
+        <ol
+          id={logsId}
+          className="mt-6 bg-paper-2 border border-rule px-4 py-3.5 font-mono text-mono text-ink leading-[1.7]"
+        >
+          {logs.map((l) => (
+            <li key={l.t} className="grid grid-cols-[7.5ch_1fr] gap-4">
+              <span className="text-ink-2 tabular-nums">{l.t}</span>
+              <span className="[overflow-wrap:anywhere]">{l.text}</span>
+            </li>
+          ))}
+        </ol>
+      ) : null}
     </Frame>
   );
 }
@@ -839,16 +982,16 @@ function MetaGrid({ items }: { items: { k: string; v: string }[] }) {
           <div
             key={item.k}
             className={[
-              "border-b border-rule py-3.5 sm:px-5",
-              isLeft ? "sm:border-r sm:border-rule" : "",
-              i === 0 ? "sm:pl-0" : "",
-              !isLeft ? "sm:pr-0" : "",
+              "border-b border-rule py-3.5",
+              isLeft ? "sm:pr-5 sm:border-r sm:border-rule" : "sm:pl-5",
             ].join(" ")}
           >
             <dt className="font-mono text-meta uppercase tracking-wide text-ink-2">
               {item.k}
             </dt>
-            <dd className="mt-1 font-mono text-mono text-ink">{item.v}</dd>
+            <dd className="mt-1 font-mono text-mono text-ink min-w-0 [overflow-wrap:anywhere]">
+              {item.v}
+            </dd>
           </div>
         );
       })}
@@ -882,98 +1025,64 @@ function slugifyBranch(b: string) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Orchestrator: drives the full flow with internal state machine.
-// Used both inline (on /start) and as overlay (from homepage trigger).
+// Orchestrator: drives the full flow with an internal state machine.
+// Rendered inline on /start.
 // ─────────────────────────────────────────────────────────────────────────────
 
-export function StartPodFlow({
-  display = "inline",
-  open = true,
-  onClose,
-}: {
-  display?: "inline" | "overlay";
-  open?: boolean;
-  onClose?: () => void;
-}) {
+export function StartPodFlow() {
   const [stage, setStage] = useState<Stage>("form");
   const [data, setData] = useState<PodFormData>(DEFAULT_FORM);
+  // True only after a stage transition, so the heading takes focus then but
+  // never on first render (the /start page must not steal focus on load).
+  const [transitioned, setTransitioned] = useState(false);
+  const [announcement, setAnnouncement] = useState("");
 
   function handleSubmit(d: PodFormData) {
     setData(d);
     setStage("boot");
+    setTransitioned(true);
   }
 
-  function handleClose() {
+  function handleBootComplete() {
+    setStage("success");
+    setTransitioned(true);
+    setAnnouncement(
+      `Pod running. Preview URL pr-${slugifyBranch(data.branch)}.nexus-sync.example.`,
+    );
+  }
+
+  function handleStop() {
     setStage("form");
-    onClose?.();
+    setTransitioned(true);
+    setAnnouncement("Pod stopped.");
   }
 
-  // Reset to form when re-opened from outside
-  useEffect(() => {
-    if (open) setStage("form");
-  }, [open]);
-
-  // Prevent body scroll while overlay is open
-  useEffect(() => {
-    if (display !== "overlay" || !open) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, [display, open]);
-
-  // Escape to close overlay
-  useEffect(() => {
-    if (display !== "overlay" || !open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") handleClose();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [display, open]);
-
-  const inner = (
-    <>
+  return (
+    <div className="w-full">
+      <p role="status" className="sr-only">
+        {announcement}
+      </p>
       {stage === "form" ? (
         <StartPodForm
           initial={data}
           onSubmit={handleSubmit}
-          onCancel={display === "overlay" ? handleClose : undefined}
+          autoFocusTitle={transitioned}
         />
       ) : null}
       {stage === "boot" ? (
-        <StartPodBoot branch={data.branch} onComplete={() => setStage("success")} />
+        <StartPodBoot
+          pod={data}
+          onComplete={handleBootComplete}
+          autoFocusTitle={transitioned}
+        />
       ) : null}
       {stage === "success" ? (
-        <StartPodSuccess branch={data.branch} onClose={handleClose} />
+        <StartPodSuccess
+          pod={data}
+          onStop={handleStop}
+          autoFocusTitle={transitioned}
+        />
       ) : null}
-    </>
-  );
-
-  if (display === "inline") {
-    return <div className="w-full">{inner}</div>;
-  }
-
-  if (!open) return null;
-
-  return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      className="fixed inset-0 z-50 grid place-items-start sm:place-items-center overflow-y-auto"
-    >
-      {/* Flat ink-tinted scrim. No blur. */}
-      <button
-        type="button"
-        aria-label="Close"
-        onClick={handleClose}
-        className="fixed inset-0 bg-ink/55 animate-[fadeIn_220ms_cubic-bezier(0.16,1,0.3,1)_both]"
-      />
-      <div className="relative w-full sm:max-w-[820px] sm:my-12 px-0 sm:px-6 animate-[panelIn_380ms_cubic-bezier(0.16,1,0.3,1)_both]">
-        {inner}
-      </div>
     </div>
   );
 }

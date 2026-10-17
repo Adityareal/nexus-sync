@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Logo } from "@/components/Logo";
+import { SiteHeader } from "@/components/SiteHeader";
+import { SiteFooter } from "@/components/SiteFooter";
 import { StartPodFlow } from "@/components/StartPodFlow";
 
 export const metadata = {
@@ -10,43 +11,24 @@ export const metadata = {
 
 export default function StartPage() {
   return (
-    <main id="main">
-      <Header />
-      <Intro />
-      <LiveFlow />
-      <NeedHelp />
-      <Footer />
-    </main>
+    <>
+      <SiteHeader />
+      <main id="main">
+        <Intro />
+        <LiveFlow />
+        <NeedHelp />
+      </main>
+      <SiteFooter />
+    </>
   );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-function Header() {
-  return (
-    <header className="border-b border-rule">
-      <div className="mx-auto max-w-[1200px] px-6 py-5 flex items-center justify-between">
-        <Logo />
-        <nav className="hidden sm:flex items-center gap-8 text-meta text-ink-2">
-          <Link href="/" className="hover:text-ink underline-offset-4 hover:underline">
-            Home
-          </Link>
-          <Link href="/docs" className="hover:text-ink underline-offset-4 hover:underline">
-            Docs
-          </Link>
-        </nav>
-      </div>
-    </header>
-  );
-}
-
 function Intro() {
   return (
     <section className="mx-auto max-w-[1100px] px-6 pt-16 sm:pt-24 pb-12 sm:pb-16">
-      <p className="font-mono text-meta uppercase tracking-wide text-ink-2">
-        Flow <span className="mx-1.5 text-rule">/</span> Ephemeral pod
-      </p>
-      <h1 className="mt-4 font-serif text-ink text-[44px] sm:text-h1 leading-[1.06] font-bold tracking-tight max-w-[20ch]">
+      <h1 className="font-serif text-ink text-[44px] sm:text-h1 leading-[1.06] font-bold tracking-tight max-w-[20ch]">
         From click to running pod, in four stages.
       </h1>
       <p className="mt-6 text-body-l text-ink-2 max-w-[60ch]">
@@ -67,15 +49,14 @@ function LiveFlow() {
     <section className="bg-paper-2 border-y border-rule py-12 sm:py-16">
       <div className="mx-auto max-w-[1100px] px-6">
         <div className="mb-8 sm:mb-10 max-w-[60ch]">
-          <p className="font-mono text-meta uppercase tracking-wide text-ink-2">Live</p>
-          <h2 className="mt-2 font-serif text-h2 text-ink">Try it.</h2>
+          <h2 className="font-serif text-h2 text-ink">Try it.</h2>
           <p className="mt-3 text-body text-ink-2">
             The form below is the real component. Submit it to watch the boot sequence and reach
             the success state. No backend yet, no pod actually starts; the timing and behaviour
             are production.
           </p>
         </div>
-        <StartPodFlow display="inline" />
+        <StartPodFlow />
       </div>
     </section>
   );
@@ -90,8 +71,7 @@ function NeedHelp() {
     <section className="border-t border-rule">
       <div className="mx-auto max-w-[1100px] px-6 py-16 sm:py-24 grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-x-12 gap-y-6 items-baseline">
         <div>
-          <p className="font-mono text-meta uppercase tracking-wide text-ink-2">Help</p>
-          <h2 className="mt-2 font-serif text-h2 sm:text-[40px] text-ink leading-[1.06] tracking-tight">
+          <h2 className="font-serif text-h2 sm:text-[40px] text-ink leading-[1.06] tracking-tight">
             Need help?
           </h2>
         </div>
@@ -115,20 +95,3 @@ function NeedHelp() {
   );
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-
-function Footer() {
-  return (
-    <footer className="border-t border-rule">
-      <div className="mx-auto max-w-[1100px] px-6 py-10 flex flex-wrap items-center justify-between gap-4">
-        <p className="font-mono text-meta text-ink-2">Nexus-Sync</p>
-        <Link
-          href="/"
-          className="font-mono text-meta text-ink-2 hover:text-ink underline underline-offset-4 decoration-rule hover:decoration-signal"
-        >
-          ← Back to home
-        </Link>
-      </div>
-    </footer>
-  );
-}

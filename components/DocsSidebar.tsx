@@ -40,7 +40,7 @@ export function DocsSidebar() {
                     >
                       {item.title}
                       {item.status === "drafting" && (
-                        <span className="ml-2 font-mono text-[11px] text-ink-2 opacity-70">
+                        <span className="ml-2 font-mono text-[11px] text-ink-2">
                           drafting
                         </span>
                       )}

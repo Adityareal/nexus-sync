@@ -1,42 +1,24 @@
-import { Logo } from "@/components/Logo";
+import Link from "next/link";
+import { SiteHeader } from "@/components/SiteHeader";
 import { MirrorDiagram } from "@/components/HeroIllustration";
 import { SiteFooter } from "@/components/SiteFooter";
 
 export default function Page() {
   return (
-    <main id="main">
-      <Masthead />
-      <Hero />
-      <MirrorSection />
-      <ClaimsSection />
-      <PrimitivesSection />
-      <CodeListing />
-      <CompareSection />
-      <Pricing />
-      <Closing />
+    <>
+      <SiteHeader />
+      <main id="main">
+        <Hero />
+        <MirrorSection />
+        <ClaimsSection />
+        <PrimitivesSection />
+        <CodeListing />
+        <CompareSection />
+        <Pricing />
+        <Closing />
+      </main>
       <SiteFooter />
-    </main>
-  );
-}
-
-function Masthead() {
-  return (
-    <header className="border-b border-rule">
-      <div className="mx-auto max-w-[1200px] px-6 py-5 flex items-center justify-between">
-        <Logo />
-        <nav className="hidden sm:flex items-center gap-8 text-meta text-ink-2">
-          <a href="#product" className="hover:text-ink underline-offset-4 hover:underline">
-            Product
-          </a>
-          <a href="#pricing" className="hover:text-ink underline-offset-4 hover:underline">
-            Pricing
-          </a>
-          <a href="/docs" className="hover:text-ink underline-offset-4 hover:underline">
-            Docs
-          </a>
-        </nav>
-      </div>
-    </header>
+    </>
   );
 }
 
@@ -124,31 +106,31 @@ function PrimitivesSection() {
       n: "01",
       name: "Ephemeral pods",
       body: "An isolated environment that boots in under two seconds and disposes of itself when you close the laptop. Branches get their own. Reviews get their own. Nothing is shared.",
-      cmd: "nexus pod create",
+      cmd: "nxs up",
     },
     {
       n: "02",
       name: "Mirror sync engine",
-      body: "A bidirectional file stream between your laptop and the pod, optimized for the editor save loop. Round trip is sub 100 milliseconds on a typical broadband connection.",
-      cmd: "nexus sync watch",
+      body: "A bidirectional file stream between your laptop and the pod, optimized for the editor save loop. Round trip is under 100 milliseconds on a typical broadband connection.",
+      cmd: "nxs sync watch",
     },
     {
       n: "03",
       name: "Instant previews",
       body: "Every save produces a unique URL. Designers, product managers, and customers see your work without you screen sharing or pushing a branch.",
-      cmd: "nexus preview share",
+      cmd: "nxs share",
     },
     {
       n: "04",
       name: "Live database sandbox",
       body: "Fork production data with personally identifiable columns anonymized at fork time. Real query plans, real edge cases, no liability.",
-      cmd: "nexus db fork --anonymize",
+      cmd: "nxs db fork --anonymize",
     },
     {
       n: "05",
       name: "Multiplayer collaboration",
       body: "Invite a teammate to inspect the same running request, set a breakpoint, edit a file. The pod is the shared workspace.",
-      cmd: "nexus invite ada@team.com",
+      cmd: "nxs invite ada@example.com",
     },
   ];
   return (
@@ -160,7 +142,7 @@ function PrimitivesSection() {
             key={it.n}
             className="border-b border-rule py-7 sm:py-9 grid grid-cols-[3rem_1fr] gap-x-6"
           >
-            <span className="font-mono text-meta text-ink-2 pt-1.5">{it.n}</span>
+            <span aria-hidden="true" className="font-mono text-meta text-ink-2 pt-1.5">{it.n}</span>
             <div>
               <h3 className="font-serif italic text-h3 text-ink">{it.name}</h3>
               <p className="mt-3 text-body text-ink-2 max-w-[55ch]">{it.body}</p>
@@ -176,21 +158,21 @@ function PrimitivesSection() {
 }
 
 function CodeListing() {
-  const code = `import { defineConfig } from "@nexus-sync/core";
+  const code = `import { defineConfig } from "nexus:config";
 
 export default defineConfig({
   pod: {
     image: "node:20-alpine",
     cpu: "2",
     memory: "4Gi",
-    ttl: "8h",
+    idleTimeout: "8h",
   },
   sync: {
     watch: ["app/**", "lib/**", "prisma/**"],
     ignore: ["node_modules", ".next"],
   },
   preview: {
-    domain: "pr-{branch}.nexus-sync.dev",
+    domain: "pr-{branch}.nexus-sync.example",
     auth: "team",
   },
   database: {
@@ -202,20 +184,21 @@ export default defineConfig({
     <section className="bg-paper-2 border-y border-rule py-12 sm:py-16">
       <div className="mx-auto max-w-[1100px] px-6">
         <div className="mb-8 sm:mb-10 max-w-[60ch]">
-          <p className="font-mono text-meta text-ink-2 mb-3">
-            01 — Configuration
-          </p>
           <h2 className="font-serif text-h2 text-ink">
             One file. Your whole environment.
           </h2>
           <p className="mt-3 text-body text-ink-2">
             Declare the pod, sync rules, preview domain, and database fork in a
             single typed config. Commit it, and every teammate gets the same
-            environment on their next <code className="font-mono text-mono text-code-ink">nexus up</code>.
+            environment on their next <code className="font-mono text-mono text-code-ink">nxs up</code>.
           </p>
         </div>
         <p className="font-mono text-meta text-ink-2 mb-3">nexus.config.ts</p>
-        <pre className="font-mono text-[13px] sm:text-mono text-ink leading-relaxed overflow-x-auto">
+        <pre
+          tabIndex={0}
+          aria-label="nexus.config.ts"
+          className="font-mono text-[13px] sm:text-mono text-ink leading-relaxed overflow-x-auto"
+        >
           <code>{code}</code>
         </pre>
       </div>
@@ -272,7 +255,7 @@ function Pricing() {
     { name: "Solo", desc: "Free for personal projects, one engineer, public previews.", price: "$0" },
     {
       name: "Team",
-      desc: "Up to twenty five engineers, private previews, anonymized data fork.",
+      desc: "Up to twenty-five engineers, private previews, anonymized data fork.",
       price: "$24 per seat per month",
     },
     {
@@ -291,13 +274,22 @@ function Pricing() {
         {tiers.map((t) => (
           <li
             key={t.name}
-            className="grid grid-cols-[1fr_auto] items-baseline gap-6 py-6 sm:py-7 border-b border-rule"
+            className="grid grid-cols-1 gap-y-3 sm:grid-cols-[1fr_auto] sm:items-baseline sm:gap-x-6 sm:gap-y-0 py-6 sm:py-7 border-b border-rule"
           >
             <div>
               <p className="font-serif text-h3 text-ink">{t.name}</p>
               <p className="mt-1 text-body text-ink-2 max-w-[48ch]">{t.desc}</p>
             </div>
-            <p className="font-mono text-mono text-ink whitespace-nowrap">{t.price}</p>
+            {t.name === "Enterprise" ? (
+              <a
+                href="mailto:sales@nexus-sync.example"
+                className="font-mono text-mono text-ink whitespace-nowrap underline underline-offset-4 decoration-signal decoration-1 hover:decoration-2 hover:text-signal-deep"
+              >
+                {t.price}
+              </a>
+            ) : (
+              <p className="font-mono text-mono text-ink whitespace-nowrap">{t.price}</p>
+            )}
           </li>
         ))}
       </ul>
@@ -309,9 +301,23 @@ function Closing() {
   return (
     <section className="bg-paper-2 border-y border-rule py-24 sm:py-36">
       <div className="mx-auto max-w-[860px] px-6">
-        <blockquote className="font-serif italic text-ink text-[32px] sm:text-[44px] md:text-[52px] leading-[1.1] font-semibold tracking-tight">
+        <p className="font-serif italic text-ink text-[32px] sm:text-[44px] md:text-[52px] leading-[1.1] font-semibold tracking-tight">
           The fastest way to feel like the team that built the tool.
-        </blockquote>
+        </p>
+        <div className="mt-10 sm:mt-12 flex flex-wrap items-center gap-x-8 gap-y-4">
+          <a
+            href="/start"
+            className="inline-block bg-signal-deep text-paper px-6 py-3 font-mono text-meta tracking-wide hover:bg-ink transition-colors duration-200"
+          >
+            Start a pod
+          </a>
+          <Link
+            href="/docs/quickstart"
+            className="text-meta text-ink-2 hover:text-ink underline underline-offset-4 decoration-signal decoration-1 hover:decoration-2"
+          >
+            Read the quickstart
+          </Link>
+        </div>
       </div>
     </section>
   );

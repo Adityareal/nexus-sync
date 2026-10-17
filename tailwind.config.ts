@@ -10,6 +10,7 @@ const config: Config = {
         ink: "oklch(0.18 0.012 75)",
         "ink-2": "oklch(0.42 0.010 75)",
         rule: "oklch(0.86 0.012 75)",
+        "rule-strong": "oklch(0.62 0.012 75)",
         signal: "oklch(0.62 0.165 38)",
         "signal-deep": "oklch(0.48 0.140 38)",
         "code-ink": "oklch(0.30 0.045 235)",
@@ -30,6 +31,7 @@ const config: Config = {
         mono: ["15px", { lineHeight: "1.55" }],
       },
       transitionTimingFunction: {
+        DEFAULT: "cubic-bezier(0.16, 1, 0.3, 1)",
         "out-quart": "cubic-bezier(0.16, 1, 0.3, 1)",
       },
     },

@@ -25,7 +25,7 @@ export function DocPage({
         {kicker && (
           <p className="font-mono text-meta text-ink-2 mb-3">{kicker}</p>
         )}
-        <h1 className="font-serif text-h1 text-ink mb-8 leading-[1.1]">
+        <h1 className="font-serif text-[36px] sm:text-h1 text-ink mb-8 leading-[1.1] break-words">
           {title}
         </h1>
         <div className="text-body text-ink space-y-6">{children}</div>
@@ -33,15 +33,15 @@ export function DocPage({
         <p className="font-mono text-meta text-ink-2">
           Sharper way to say this?{" "}
           <a
-            href="mailto:docs@nexus-sync.dev"
+            href="mailto:docs@nexus-sync.example"
             className="text-ink hover:text-signal-deep underline underline-offset-4 decoration-signal decoration-1 hover:decoration-2"
           >
-            docs@nexus-sync.dev
+            docs@nexus-sync.example
           </a>
         </p>
       </article>
       {hasToc && (
-        <aside className="hidden xl:block">
+        <aside aria-label="Table of contents" className="hidden xl:block">
           <DocsToc items={toc!} />
         </aside>
       )}
@@ -59,7 +59,7 @@ export function Code({ children }: { children: ReactNode }) {
 
 export function Pre({ children }: { children: ReactNode }) {
   return (
-    <pre className="font-mono text-mono text-ink bg-paper-2 border border-rule px-4 py-3 overflow-x-auto leading-relaxed">
+    <pre tabIndex={0} className="font-mono text-mono text-ink bg-paper-2 border border-rule px-4 py-3 overflow-x-auto leading-relaxed">
       <code>{children}</code>
     </pre>
   );

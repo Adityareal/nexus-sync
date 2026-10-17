@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Source_Serif_4, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -19,14 +19,26 @@ const serif = Source_Serif_4({
 const mono = JetBrains_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
-  weight: ["400", "500"],
   display: "swap",
 });
 
+const title = "Nexus-Sync, an ephemeral cloud for development";
+const description =
+  "A pod boots in 1.8 seconds. Every save streams under 100 milliseconds to a sandbox with anonymized production data. Share previews. Pair on running apps.";
+
 export const metadata: Metadata = {
-  title: "Nexus-Sync, an ephemeral cloud for development",
-  description:
-    "A pod boots in 1.8 seconds. Every save streams under 100 milliseconds to a sandbox with anonymized production data. Share previews. Pair on running apps.",
+  title,
+  description,
+  openGraph: {
+    title,
+    description,
+    siteName: "Nexus-Sync",
+    type: "website",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#f9f5f0",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

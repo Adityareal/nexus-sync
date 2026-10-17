@@ -1,7 +1,7 @@
-import Link from "next/link";
-import { Logo } from "@/components/Logo";
+import { SiteHeader } from "@/components/SiteHeader";
 import { DocsSidebar } from "@/components/DocsSidebar";
 import { DocsSearch } from "@/components/DocsSearch";
+import { CLI } from "@/lib/docs/cli";
 
 export const metadata = {
   title: "Documentation, Nexus-Sync",
@@ -16,9 +16,9 @@ export default function DocsLayout({
 }) {
   return (
     <div className="min-h-screen flex flex-col">
-      <DocsMasthead />
+      <SiteHeader current="docs" wide />
       <div className="flex-1 mx-auto max-w-[1320px] w-full px-6 py-10 lg:py-12 grid lg:grid-cols-[240px_1fr] gap-x-10 lg:gap-x-12">
-        <aside className="hidden lg:block">
+        <aside aria-label="Docs sidebar" className="hidden lg:block">
           <div className="sticky top-10 max-h-[calc(100vh-5rem)] overflow-y-auto pr-3 pb-12">
             <DocsSearch />
             <div className="mt-8">
@@ -53,42 +53,6 @@ export default function DocsLayout({
   );
 }
 
-function DocsMasthead() {
-  return (
-    <header className="border-b border-rule">
-      <div className="mx-auto max-w-[1320px] px-6 py-5 flex items-center justify-between">
-        <Link href="/" aria-label="Nexus-Sync home" className="block">
-          <Logo />
-        </Link>
-        <nav
-          aria-label="Primary"
-          className="hidden sm:flex items-center gap-8 text-meta text-ink-2"
-        >
-          <Link
-            href="/#product"
-            className="hover:text-ink underline-offset-4 hover:underline"
-          >
-            Product
-          </Link>
-          <Link
-            href="/#pricing"
-            className="hover:text-ink underline-offset-4 hover:underline"
-          >
-            Pricing
-          </Link>
-          <Link
-            href="/docs"
-            aria-current="page"
-            className="text-ink font-semibold underline underline-offset-4 decoration-signal decoration-2"
-          >
-            Docs
-          </Link>
-        </nav>
-      </div>
-    </header>
-  );
-}
-
 function DocsFooter() {
   return (
     <footer className="border-t border-rule">
@@ -99,7 +63,7 @@ function DocsFooter() {
             className="inline-block w-2 h-2 rounded-full bg-signal"
             aria-hidden
           />
-          docs v1, in revision
+          written for {CLI.packageName} {CLI.version}
         </span>
       </div>
     </footer>

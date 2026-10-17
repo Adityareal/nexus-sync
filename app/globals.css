@@ -8,6 +8,8 @@
   --ink: oklch(0.18 0.012 75);
   --ink-2: oklch(0.42 0.010 75);
   --rule: oklch(0.86 0.012 75);
+  /* Borders that identify a control (inputs, switches). 3.4:1 on paper, 3.1:1 on paper-2. */
+  --rule-strong: oklch(0.62 0.012 75);
   --signal: oklch(0.62 0.165 38);
   --signal-deep: oklch(0.48 0.140 38);
   --code-ink: oklch(0.30 0.045 235);
@@ -16,6 +18,19 @@
 
 html {
   background: var(--paper);
+  scrollbar-color: var(--rule-strong) var(--paper);
+}
+
+input,
+textarea {
+  caret-color: var(--signal-deep);
+}
+
+/* Escape clears the docs search; the browser's own clear glyph is unthemed. */
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 body {
@@ -92,16 +107,6 @@ a {
   outline-offset: 2px;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes panelIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
 @keyframes logIn {
   from { opacity: 0; transform: translateY(3px); }
   to { opacity: 1; transform: translateY(0); }
@@ -112,9 +117,19 @@ a {
   51%, 100% { opacity: 0; }
 }
 
+/* Hero diagram, on hover: one save travels the 392 user units from the file to the pod. */
+@keyframes mirrorTick {
+  0% { transform: translateX(0); opacity: 0; }
+  12% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translateX(392px); opacity: 0; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
   }
 }

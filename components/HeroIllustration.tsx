@@ -18,7 +18,7 @@ export function MirrorDiagram() {
             markerHeight="8"
             orient="auto-start-reverse"
           >
-            <path d="M0 0 L10 5 L0 10 z" fill="oklch(0.18 0.012 75)" />
+            <path d="M0 0 L10 5 L0 10 z" className="fill-ink" />
           </marker>
         </defs>
 
@@ -26,20 +26,20 @@ export function MirrorDiagram() {
           <path
             d="M0 0 H110 L130 20 V100 H0 Z"
             fill="none"
-            stroke="oklch(0.18 0.012 75)"
+            className="stroke-ink"
             strokeWidth="1.25"
           />
           <path
             d="M110 0 V20 H130"
             fill="none"
-            stroke="oklch(0.18 0.012 75)"
+            className="stroke-ink"
             strokeWidth="1.25"
           />
           <text
             x="65"
             y="60"
             textAnchor="middle"
-            fill="oklch(0.18 0.012 75)"
+            className="fill-ink"
             fontFamily="var(--font-mono), ui-monospace, monospace"
             fontSize="13"
           >
@@ -52,18 +52,28 @@ export function MirrorDiagram() {
           y1="110"
           x2="610"
           y2="110"
-          stroke="oklch(0.18 0.012 75)"
+          className="stroke-ink"
           strokeWidth="1.25"
           markerEnd="url(#arrow-ink-h)"
         />
 
+        {/* One copper save rides the connector on hover, then resets on leave. */}
+        <rect
+          x="200"
+          y="108.5"
+          width="18"
+          height="3"
+          aria-hidden="true"
+          className="fill-signal-deep opacity-0 group-hover:animate-[mirrorTick_640ms_cubic-bezier(0.16,1,0.3,1)_both]"
+        />
+
         <g transform="translate(620, 60)">
-          <rect x="0" y="0" width="130" height="100" fill="oklch(0.62 0.165 38)" />
+          <rect x="0" y="0" width="130" height="100" className="fill-signal" />
           <text
             x="65"
             y="58"
             textAnchor="middle"
-            fill="oklch(0.972 0.008 75)"
+            className="fill-ink"
             fontFamily="var(--font-mono), ui-monospace, monospace"
             fontSize="13"
           >
@@ -75,10 +85,9 @@ export function MirrorDiagram() {
           x="405"
           y="100"
           textAnchor="middle"
-          fill="oklch(0.62 0.165 38)"
+          className="fill-signal-deep opacity-0 transition-opacity duration-200 group-hover:opacity-100 [@media(hover:none)]:opacity-100"
           fontFamily="var(--font-mono), ui-monospace, monospace"
           fontSize="13"
-          className="opacity-0 transition-opacity duration-200 group-hover:opacity-100"
         >
           94ms
         </text>
@@ -101,7 +110,7 @@ export function MirrorDiagram() {
             markerHeight="8"
             orient="auto-start-reverse"
           >
-            <path d="M0 0 L10 5 L0 10 z" fill="oklch(0.18 0.012 75)" />
+            <path d="M0 0 L10 5 L0 10 z" className="fill-ink" />
           </marker>
         </defs>
 
@@ -109,20 +118,20 @@ export function MirrorDiagram() {
           <path
             d="M0 0 H110 L130 20 V100 H0 Z"
             fill="none"
-            stroke="oklch(0.18 0.012 75)"
+            className="stroke-ink"
             strokeWidth="1.5"
           />
           <path
             d="M110 0 V20 H130"
             fill="none"
-            stroke="oklch(0.18 0.012 75)"
+            className="stroke-ink"
             strokeWidth="1.5"
           />
           <text
             x="65"
             y="60"
             textAnchor="middle"
-            fill="oklch(0.18 0.012 75)"
+            className="fill-ink"
             fontFamily="var(--font-mono), ui-monospace, monospace"
             fontSize="16"
           >
@@ -135,7 +144,7 @@ export function MirrorDiagram() {
           y1="140"
           x2="160"
           y2="220"
-          stroke="oklch(0.18 0.012 75)"
+          className="stroke-ink"
           strokeWidth="1.5"
           markerEnd="url(#arrow-ink-v)"
         />
@@ -143,7 +152,7 @@ export function MirrorDiagram() {
         <text
           x="184"
           y="186"
-          fill="oklch(0.62 0.165 38)"
+          className="fill-signal-deep"
           fontFamily="var(--font-mono), ui-monospace, monospace"
           fontSize="14"
         >
@@ -151,12 +160,12 @@ export function MirrorDiagram() {
         </text>
 
         <g transform="translate(95, 230)">
-          <rect x="0" y="0" width="130" height="100" fill="oklch(0.62 0.165 38)" />
+          <rect x="0" y="0" width="130" height="100" className="fill-signal" />
           <text
             x="65"
             y="58"
             textAnchor="middle"
-            fill="oklch(0.972 0.008 75)"
+            className="fill-ink"
             fontFamily="var(--font-mono), ui-monospace, monospace"
             fontSize="16"
           >

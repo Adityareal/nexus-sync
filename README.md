@@ -1,18 +1,20 @@
 # Nexus-Sync, landing page (v3 editorial)
 
-A Next.js 14 landing page for an ephemeral developer cloud. The visual language deliberately rejects the saturated dev tool category aesthetic (dark mode plus cyan and magenta neon, isometric 3D, glowing data bridges, glassmorphic cards). It commits to a warm paper surface and a single oxidized copper signal color, set in Source Serif 4 with Inter for UI and JetBrains Mono for code.
+A Next.js 15 landing page for an ephemeral developer cloud. The visual language deliberately rejects the saturated dev tool category aesthetic (dark mode plus cyan and magenta neon, isometric 3D, glowing data bridges, glassmorphic cards). It commits to a warm paper surface and a single oxidized copper signal color, set in Source Serif 4 with Inter for UI and JetBrains Mono for code.
 
-The design choices are documented in `PRODUCT.md` and `DESIGN.md` per the impeccable skill. Read those before changing a token.
+The design choices follow `PRODUCT.md` and `DESIGN.md`. Read those before changing a token. The impeccable design skill is installed globally, not vendored in this repo.
 
 ## Run
 
 ```bash
-npm install
-npm run dev
-# open http://localhost:3000
+npm run dev        # binds 127.0.0.1; use `npx next dev -H 0.0.0.0` to test from a phone on your network
+npm run lint
+npm run typecheck
+npm test
+npm run build
 ```
 
-Requires Node 18 or later.
+Requires Node 18.18 or later. The test suite (Vitest and Testing Library) needs Node 22.12 or later.
 
 ## Design tokens
 
@@ -25,6 +27,7 @@ OKLCH, in `tailwind.config.ts` and `app/globals.css`.
 | `ink` | `oklch(0.18 0.012 75)` |
 | `ink-2` | `oklch(0.42 0.010 75)` |
 | `rule` | `oklch(0.86 0.012 75)` |
+| `rule-strong` | `oklch(0.62 0.012 75)` |
 | `signal` | `oklch(0.62 0.165 38)` |
 | `signal-deep` | `oklch(0.48 0.140 38)` |
 | `code-ink` | `oklch(0.30 0.045 235)` |
@@ -39,18 +42,26 @@ Source Serif 4 for display, Inter for UI text, JetBrains Mono for code. Sizes: 7
 
 - Glassmorphism, gradient text, neon, isometric perspective, floating Kubernetes hexagons.
 - Identical card grids, hero metric tile templates, em dashes in copy, the word seamless.
+- Eyebrow labels above headings.
 - Dark mode in v1.
 
 ## File map
 
 - `app/page.tsx`, the editorial landing page.
-- `app/layout.tsx`, font wiring via `next/font`.
+- `app/layout.tsx`, font wiring via `next/font`, metadata, viewport.
+- `app/not-found.tsx`, the branded 404 page.
 - `app/globals.css`, OKLCH custom properties and base styles.
 - `components/Logo.tsx`, ink wordmark with a single copper diacritic.
+- `components/SiteHeader.tsx`, the shared masthead.
+- `components/SiteFooter.tsx`, the shared footer.
 - `components/HeroIllustration.tsx`, two color mirror diagram.
-- `components/Icons.tsx`, deprecated.
+- `components/StartPodFlow.tsx`, the /start demo.
+- `components/Docs*.tsx`, the docs layout, sidebar, search, and page chrome.
+- `lib/docs/content.ts`, docs content source.
+- `tests/`, Vitest suites including the copy-rule enforcement test.
+- `.github/workflows/ci.yml`, CI: lint, typecheck, test, build.
+- `eslint.config.mjs`, ESLint 9 flat config.
 - `tailwind.config.ts`, design tokens.
 - `PRODUCT.md`, audience, voice, anti references, hard constraints.
 - `DESIGN.md`, theme decision, color strategy, typography, motion.
 - `prompts.md`, image prompt pack matching the editorial register.
-- `SKILL.md`, the impeccable design skill.

@@ -1,5 +1,4 @@
-import Link from "next/link";
-import { Logo } from "@/components/Logo";
+import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 
 export const metadata = {
@@ -10,54 +9,19 @@ export const metadata = {
 
 export default function CareersPage() {
   return (
-    <main id="main">
-      <Masthead />
-      <Intro />
-      <HowWeWork />
-      <OpenRoles />
-      <WhatYouGet />
-      <HowWeHire />
-      <NotHiring />
-      <Closing />
+    <>
+      <SiteHeader />
+      <main id="main">
+        <Intro />
+        <HowWeWork />
+        <OpenRoles />
+        <WhatYouGet />
+        <HowWeHire />
+        <NotHiring />
+        <Closing />
+      </main>
       <SiteFooter />
-    </main>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-
-function Masthead() {
-  return (
-    <header className="border-b border-rule">
-      <div className="mx-auto max-w-[1200px] px-6 py-5 flex items-center justify-between">
-        <Link href="/" aria-label="Nexus-Sync home" className="block">
-          <Logo />
-        </Link>
-        <nav
-          aria-label="Primary"
-          className="hidden sm:flex items-center gap-8 text-meta text-ink-2"
-        >
-          <Link
-            href="/#product"
-            className="hover:text-ink underline-offset-4 hover:underline"
-          >
-            Product
-          </Link>
-          <Link
-            href="/#pricing"
-            className="hover:text-ink underline-offset-4 hover:underline"
-          >
-            Pricing
-          </Link>
-          <Link
-            href="/docs"
-            className="hover:text-ink underline-offset-4 hover:underline"
-          >
-            Docs
-          </Link>
-        </nav>
-      </div>
-    </header>
+    </>
   );
 }
 
@@ -114,8 +78,7 @@ function HowWeWork() {
   return (
     <section className="border-t border-rule bg-paper-2">
       <div className="mx-auto max-w-[1100px] px-6 py-20 sm:py-28">
-        <p className="font-mono text-meta uppercase tracking-wide text-ink-2">Principles</p>
-        <h2 className="mt-2 font-serif text-h2 sm:text-h1 text-ink max-w-[22ch] leading-[1.08]">
+        <h2 className="font-serif text-h2 sm:text-h1 text-ink max-w-[22ch] leading-[1.08]">
           How the work actually gets done.
         </h2>
         <ol className="mt-12 border-t border-rule">
@@ -124,7 +87,7 @@ function HowWeWork() {
               key={p.n}
               className="border-b border-rule py-8 sm:py-10 grid grid-cols-[3rem_1fr] gap-x-6"
             >
-              <span className="font-mono text-meta text-ink-2 pt-1.5">{p.n}</span>
+              <span aria-hidden="true" className="font-mono text-meta text-ink-2 pt-1.5">{p.n}</span>
               <div>
                 <h3 className="font-serif italic text-h3 text-ink">{p.name}</h3>
                 <p className="mt-3 text-body text-ink-2 max-w-[60ch]">{p.body}</p>
@@ -169,8 +132,7 @@ function OpenRoles() {
   return (
     <section className="mx-auto max-w-[1100px] px-6 py-20 sm:py-28">
       <div className="max-w-[60ch]">
-        <p className="font-mono text-meta uppercase tracking-wide text-ink-2">Open roles</p>
-        <h2 className="mt-2 font-serif text-h2 sm:text-h1 text-ink leading-[1.08]">
+        <h2 className="font-serif text-h2 sm:text-h1 text-ink leading-[1.08]">
           Four seats, specifically.
         </h2>
         <p className="mt-5 text-body text-ink-2">
@@ -185,7 +147,7 @@ function OpenRoles() {
             key={r.n}
             className="border-b border-rule py-9 sm:py-11 grid grid-cols-[3rem_1fr] gap-x-6"
           >
-            <span className="font-mono text-meta text-ink-2 pt-2">{r.n}</span>
+            <span aria-hidden="true" className="font-mono text-meta text-ink-2 pt-2">{r.n}</span>
             <div>
               <h3 className="font-serif text-h3 sm:text-h2 text-ink leading-[1.15]">
                 {r.title}
@@ -199,10 +161,10 @@ function OpenRoles() {
       <p className="mt-10 text-body text-ink-2 max-w-[60ch]">
         All four roles share one inbox:{" "}
         <a
-          href="mailto:careers@nexus-sync.dev"
+          href="mailto:careers@nexus-sync.example"
           className="text-ink hover:text-signal-deep underline underline-offset-4 decoration-signal decoration-1 hover:decoration-2"
         >
-          careers@nexus-sync.dev
+          careers@nexus-sync.example
         </a>
         . Include the role title in the subject. A human replies within three business days,
         even if the answer is no.
@@ -244,10 +206,7 @@ function WhatYouGet() {
     <section className="border-y border-rule bg-paper-2">
       <div className="mx-auto max-w-[1100px] px-6 py-20 sm:py-28">
         <div className="max-w-[60ch]">
-          <p className="font-mono text-meta uppercase tracking-wide text-ink-2">
-            Compensation and benefits
-          </p>
-          <h2 className="mt-2 font-serif text-h2 sm:text-h1 text-ink leading-[1.08]">
+          <h2 className="font-serif text-h2 sm:text-h1 text-ink leading-[1.08]">
             The rest of the offer.
           </h2>
         </div>
@@ -305,8 +264,7 @@ function HowWeHire() {
   return (
     <section className="mx-auto max-w-[1100px] px-6 py-20 sm:py-28">
       <div className="max-w-[60ch]">
-        <p className="font-mono text-meta uppercase tracking-wide text-ink-2">Process</p>
-        <h2 className="mt-2 font-serif text-h2 sm:text-h1 text-ink leading-[1.08]">
+        <h2 className="font-serif text-h2 sm:text-h1 text-ink leading-[1.08]">
           Eighteen days, typically.
         </h2>
         <p className="mt-5 text-body text-ink-2">
@@ -321,7 +279,7 @@ function HowWeHire() {
             key={s.n}
             className="border-b border-rule py-7 sm:py-9 grid grid-cols-[3rem_1fr] sm:grid-cols-[3rem_1fr_8rem] gap-x-6 sm:gap-x-8 items-baseline"
           >
-            <span className="font-mono text-meta text-ink-2 pt-1">{s.n}</span>
+            <span aria-hidden="true" className="font-mono text-meta text-ink-2 pt-1">{s.n}</span>
             <div>
               <h3 className="font-serif italic text-h3 text-ink">{s.name}</h3>
               <p className="mt-3 text-body text-ink-2 max-w-[58ch]">{s.body}</p>
@@ -349,10 +307,7 @@ function NotHiring() {
     <section className="border-t border-rule">
       <div className="mx-auto max-w-[1100px] px-6 py-20 sm:py-28">
         <div className="max-w-[60ch]">
-          <p className="font-mono text-meta uppercase tracking-wide text-ink-2">
-            Also, for clarity
-          </p>
-          <h2 className="mt-2 font-serif text-h2 sm:text-h1 text-ink leading-[1.08]">
+          <h2 className="font-serif text-h2 sm:text-h1 text-ink leading-[1.08]">
             What we are <em className="italic">not</em> hiring for.
           </h2>
           <p className="mt-5 text-body text-ink-2">
@@ -384,17 +339,17 @@ function Closing() {
   return (
     <section className="bg-paper-2 border-y border-rule py-20 sm:py-28">
       <div className="mx-auto max-w-[860px] px-6">
-        <blockquote className="font-serif text-ink text-[28px] sm:text-[40px] md:text-[48px] leading-[1.1] font-semibold tracking-tight">
+        <p className="font-serif text-ink text-[28px] sm:text-[40px] md:text-[48px] leading-[1.1] font-semibold tracking-tight">
           Don&apos;t see your role?{" "}
           <em className="italic">We hire the senior engineer we wish we already had.</em>
-        </blockquote>
+        </p>
         <p className="mt-8 text-body-l text-ink-2 max-w-[60ch]">
           Write to{" "}
           <a
-            href="mailto:careers@nexus-sync.dev"
+            href="mailto:careers@nexus-sync.example"
             className="text-ink hover:text-signal-deep underline underline-offset-4 decoration-signal decoration-2 hover:decoration-2"
           >
-            careers@nexus-sync.dev
+            careers@nexus-sync.example
           </a>{" "}
           with a paragraph about the best thing you shipped and the hardest thing you
           debugged. Three people read every note. A human replies either way.

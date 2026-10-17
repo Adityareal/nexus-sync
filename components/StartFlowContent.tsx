@@ -9,7 +9,7 @@ export function StartFlowContent() {
   return (
     <article className="min-w-0">
       <p className="font-mono text-meta text-ink-2 mb-3">Getting started</p>
-      <h1 className="font-serif text-h1 text-ink mb-6 leading-[1.1]">
+      <h1 className="font-serif text-[36px] sm:text-h1 text-ink mb-6 leading-[1.1] break-words">
         Start flow, four stages.
       </h1>
       <p className="text-body-l text-ink-2 max-w-[60ch] mb-12 sm:mb-16">
@@ -44,28 +44,28 @@ export function StartFlowContent() {
         n="03"
         label="Boot"
         title="1.8 seconds, four milestones."
-        body="The progress bar snaps to four named stages that match the log lines on the right. Provision, database, sync, preview. Real bootstrap, real timestamps. The pod mark on the left fills clockwise as a single purposeful motion. No spinner."
+        body="The progress bar snaps to four named stages that match the log lines on the right. Provision, database, sync, preview. The log replays a recorded 1.78-second boot. The pod mark on the left fills clockwise as a single purposeful motion."
         notes={[
           "Logs reveal as a function of progress, not a fixed delay.",
           "Elapsed counter is tabular-numerical so digits do not jitter.",
           "Caret blinks at 900ms, two-step, to signal the next line is coming.",
         ]}
       >
-        <StartPodBoot branch="feature/auth-flow" autoplay={false} frozenProgress={0.62} />
+        <StartPodBoot autoplay={false} frozenProgress={0.62} />
       </StagePanel>
 
       <StagePanel
         n="04"
         label="Live"
         title="The proof is the URL."
-        body="No green checkmark, no confetti. The success state is a typeset preview URL with a copper underline, large enough to read across the room. Five actions, ranked. One copper primary, three bare-text utilities, and Stop pod set apart with a two-step inline confirmation so it never lives in a second modal."
+        body="The success state is a typeset preview URL with a copper underline, large enough to read across the room. Five actions, ranked. One copper primary, three bare-text utilities, and Stop pod set apart with a two-step inline confirmation so it never lives in a second modal."
         notes={[
           "Preview URL slug is derived live from the branch name.",
           "Pod metadata is a definition list, not a stat tile grid.",
           "Stop pod uses inline confirmation, not a destructive-red button.",
         ]}
       >
-        <StartPodSuccess branch="feature/auth-flow" frozen />
+        <StartPodSuccess frozen />
       </StagePanel>
 
       <hr className="my-12 sm:my-16 border-t border-rule" />
@@ -79,10 +79,10 @@ export function StartFlowContent() {
         </Link>
         . Sharper way to say any of this?{" "}
         <a
-          href="mailto:docs@nexus-sync.dev"
+          href="mailto:docs@nexus-sync.example"
           className="text-ink hover:text-signal-deep underline underline-offset-4 decoration-signal decoration-1 hover:decoration-2"
         >
-          docs@nexus-sync.dev
+          docs@nexus-sync.example
         </a>
       </p>
     </article>
@@ -98,11 +98,11 @@ function StageOne() {
         n="01"
         label="Trigger"
         title="The CTA is a plain anchor."
-        body="No JavaScript dependency, no event listener required. The button is a real link to /start so the primary call to action works without scripting. With JavaScript on, a future enhancement intercepts the click to open the flow as an overlay; the URL still resolves."
+        body="The button is a real link to /start, so the primary call to action works without scripting. With JavaScript on, a future enhancement intercepts the click to open the flow as an overlay; the URL still resolves."
         notes={[
           "Mono label, copper background, square corners. Matches the homepage hero CTA exactly.",
           "Hover state shifts to ink. Focus ring is copper, 2px offset.",
-          "No loading spinner on click. The next stage takes over the surface.",
+          "On click, the next stage takes over the surface.",
         ]}
       />
       <div className="mt-8 grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-0 lg:gap-px bg-rule border border-rule">
@@ -117,7 +117,7 @@ function StageOne() {
             100 milliseconds.
           </p>
           <div className="mt-7 flex flex-wrap items-center gap-x-8 gap-y-4">
-            <span className="inline-block bg-signal-deep text-paper px-6 py-3 font-mono text-meta uppercase tracking-wide ring-2 ring-signal/40 ring-offset-2 ring-offset-paper">
+            <span className="inline-block bg-signal-deep text-paper px-6 py-3 font-mono text-meta tracking-wide ring-2 ring-signal/40 ring-offset-2 ring-offset-paper">
               Start a pod
             </span>
             <span className="text-meta text-ink-2 underline underline-offset-4 decoration-signal decoration-1">
@@ -136,7 +136,7 @@ function StageOne() {
           <ul className="mt-6 space-y-3 text-body text-ink-2 max-w-[36ch]">
             <li>Background: signal-deep copper.</li>
             <li>Padding: 24px horizontal, 12px vertical.</li>
-            <li>Type: mono meta, uppercase, tracking 0.025em.</li>
+            <li>Type: mono meta, tracking 0.025em.</li>
             <li>Hover: ink background, 200ms ease-out.</li>
             <li>Focus: 2px copper ring, 2px paper offset.</li>
           </ul>
@@ -190,7 +190,7 @@ function StagePanelHeader({
         <span className="text-ink">{label}</span>
       </p>
       <div>
-        <h3 className="font-serif text-h2 text-ink">{title}</h3>
+        <h2 className="font-serif text-h2 text-ink">{title}</h2>
         <p className="mt-3 text-body text-ink-2 max-w-[60ch]">{body}</p>
       </div>
       <ul className="text-meta text-ink-2 space-y-2 lg:border-l lg:border-rule lg:pl-6">

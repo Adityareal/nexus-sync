@@ -71,8 +71,8 @@ describe("copy rules", () => {
     expectNoMatches(/nexus-sync\.dev/);
   });
 
-  it('does not reference an npm global install of the CLI', () => {
-    expectNoMatches(/npm install -g nexus-sync/);
+  it('installs the published "nexus-sync-cli" package, never the unowned "nexus-sync" name', () => {
+    expectNoMatches(/npm (?:install|i) (?:-g |--global |-D |--save-dev )?nexus-sync(?!-cli)\b/);
   });
 
   it('does not reference the "@nexus-sync/" npm scope', () => {

@@ -57,10 +57,22 @@ export function Code({ children }: { children: ReactNode }) {
   );
 }
 
-export function Pre({ children }: { children: ReactNode }) {
-  return (
-    <pre tabIndex={0} className="font-mono text-mono text-ink bg-paper-2 border border-rule px-4 py-3 overflow-x-auto leading-relaxed">
+/** A code or terminal block. `label` names the file the block shows, for example ".nexus/config.json". */
+export function Pre({ children, label }: { children: ReactNode; label?: string }) {
+  const pre = (
+    <pre
+      tabIndex={0}
+      aria-label={label}
+      className="font-mono text-mono text-ink bg-paper-2 border border-rule px-4 py-3 overflow-x-auto leading-relaxed"
+    >
       <code>{children}</code>
     </pre>
+  );
+  if (!label) return pre;
+  return (
+    <div>
+      <p className="font-mono text-meta text-ink-2 mb-2">{label}</p>
+      {pre}
+    </div>
   );
 }

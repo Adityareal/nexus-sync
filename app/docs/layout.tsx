@@ -1,6 +1,7 @@
 import { SiteHeader } from "@/components/SiteHeader";
 import { DocsSidebar } from "@/components/DocsSidebar";
 import { DocsSearch } from "@/components/DocsSearch";
+import { CLI } from "@/lib/docs/cli";
 
 export const metadata = {
   title: "Documentation, Nexus-Sync",
@@ -62,7 +63,7 @@ function DocsFooter() {
             className="inline-block w-2 h-2 rounded-full bg-signal"
             aria-hidden
           />
-          docs v1, in revision
+          written for {CLI.packageName} {CLI.version}
         </span>
       </div>
     </footer>
